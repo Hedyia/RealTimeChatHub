@@ -28,14 +28,14 @@ namespace Api
         {
             services.AddControllers();
             services.AddSignalR();
-            services.AddCors(options =>
+            services.AddCors(o => o.AddPolicy("AppPolicy", builder =>
             {
-                options.AddPolicy("mypolicy", builder => builder
-                 .WithOrigins("http://localhost:4200/")
-                 .SetIsOriginAllowed((host) => true)
-                 .AllowAnyMethod()
-                 .AllowAnyHeader());
-            });
+                builder.AllowAnyOrigin()
+                       .AllowAnyMethod()
+                       .AllowAnyHeader()
+                       .WithOrigins("https://localhost:4200")
+                       .AllowCredentials();
+            }));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -49,13 +49,12 @@ namespace Api
             app.UseHttpsRedirection();
 
             app.UseRouting();
-
-            app.UseAuthorization();
+            app.UseCors("AppPolicy");
 
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
-                endpoints.MapHub<ChatHub>("/chathub");
+                endpoints.MapHub<ChatHub>("/chat");
             });
         }
     }
